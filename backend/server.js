@@ -54,7 +54,7 @@ app.use("/api/controller", controllerLogicRoutes);
 app.use("/api/ventilation", fanLayoutRoutes);
 
 // Wildcard route to handle React Router navigation
-app.get("/*", (req, res, next) => {
+app.get("/:any*", (req, res, next) => {
   if (req.path.startsWith("/api")) return next();
   res.sendFile(path.join(frontendBuildPath, "index.html"), (err) => {
     if (err) {

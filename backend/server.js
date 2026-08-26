@@ -24,14 +24,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Test Route
-app.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Zivial AI Backend Running Successfully 🚀",
-  });
-});
-
 import path from "path";
 import { fileURLToPath } from "url";
 

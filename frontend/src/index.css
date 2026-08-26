@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #EE5C78;
+  --color-brand-dark: #CC3D58;
+  --color-brand-glow: rgba(238, 92, 120, 0.15);
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #030712;
+  color: white;
+  font-family: Inter, sans-serif;
+  overflow-x: hidden;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Light Mode */
+html.light body {
+  background: #f4f6fa;
+  color: #111827;
+}
+
+html.light .bg-\[\#030712\] { background-color: #f4f6fa !important; }
+html.light .bg-\[\#0a0a0f\] { background-color: #ffffff !important; }
+html.light .bg-\[\#0f111a\] { background-color: #f0f2f8 !important; }
+html.light .text-white { color: #111827 !important; }
+html.light .text-zinc-400 { color: #6b7280 !important; }
+html.light .text-zinc-300 { color: #4b5563 !important; }
+html.light .text-zinc-500 { color: #9ca3af !important; }
+html.light .border-white\/10 { border-color: rgba(0,0,0,0.1) !important; }
+html.light .border-white\/5 { border-color: rgba(0,0,0,0.06) !important; }
+html.light .bg-white\/5 { background-color: rgba(0,0,0,0.04) !important; }
+html.light .bg-white\/10 { background-color: rgba(0,0,0,0.07) !important; }
+html.light .bg-zinc-900 { background-color: #e5e7eb !important; }
+html.light .bg-zinc-800 { background-color: #d1d5db !important; }
+html.light .text-zinc-900 { color: #111827 !important; }
+
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom glow classes and premium layouts */
+.shadow-brand-glow {
+  box-shadow: 0 0 60px 15px rgba(238, 92, 120, 0.25);
+}
+
+.text-brand-gradient {
+  background: linear-gradient(to right, #EE5C78, #ff829b, #ffa9ba);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

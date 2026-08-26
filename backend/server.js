@@ -32,6 +32,16 @@ app.get("/", (req, res) => {
   });
 });
 
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve frontend assets in production
+const frontendBuildPath = path.join(__dirname, "../frontend/dist");
+app.use(express.static(frontendBuildPath));
+
 // API Routes
 app.use("/api/generate", generateRoutes);
 app.use("/api/ventilation", minimumVentilationRoutes);
@@ -43,11 +53,16 @@ app.use("/api/ventilation", fanSelectionRoutes);
 app.use("/api/controller", controllerLogicRoutes);
 app.use("/api/ventilation", fanLayoutRoutes);
 
-// 404 Handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "API Route Not Found",
+// Wildcard route to handle React Router navigation
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api")) return next();
+  res.sendFile(path.join(frontendBuildPath, "index.html"), (err) => {
+    if (err) {
+      res.status(404).json({
+        success: false,
+        message: "Resource not found or frontend not built.",
+      });
+    }
   });
 });
 

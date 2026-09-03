@@ -6,11 +6,10 @@ import {
 import ZivialLogo from "../common/ZivialLogo";
 
 const quickLinks = [
-  "Home",
-  "Features",
-  "Solutions",
-  "ZSE Generator",
-  "Contact",
+  { name: "Home", href: "/#home" },
+  { name: "Features", href: "/#features" },
+  { name: "Workflow", href: "/#solutions" },
+  { name: "Contact", href: "/#contact" },
 ];
 
 const resources = [
@@ -24,11 +23,11 @@ const resources = [
 const socialLinks = [
   {
     icon: Mail,
-    href: "mailto:support@zivial.ai",
+    href: "mailto:support@zivial.com",
   },
   {
     icon: Phone,
-    href: "tel:+919876543210",
+    href: "tel:+918384082626",
   },
 ];
 
@@ -60,11 +59,11 @@ export default function Footer() {
             <div className="space-y-4">
               {quickLinks.map((item) => (
                 <a
-                  key={item}
-                  href="#"
+                  key={item.name}
+                  href={item.href}
                   className="block text-gray-400 transition hover:text-brand"
                 >
-                  {item}
+                  {item.name}
                 </a>
               ))}
             </div>
@@ -98,12 +97,12 @@ export default function Footer() {
             <div className="space-y-5">
               <div className="flex items-center gap-3 text-gray-400">
                 <Mail size={18} />
-                support@zivial.ai
+                support@zivial.com
               </div>
 
               <div className="flex items-center gap-3 text-gray-400">
                 <Phone size={18} />
-                +91 98765 43210
+                +91 83840 82626
               </div>
 
               <div className="flex items-start gap-3 text-gray-400">

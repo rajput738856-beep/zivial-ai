@@ -30,6 +30,7 @@ const FarmInfrastructure = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -87,24 +88,50 @@ const FarmInfrastructure = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     if (validateForm()) {
-      navigate('/farm-preview', { 
-        state: { 
-          ...formData,
-          length: parseFloat(formData.length) || 200,
-          width: parseFloat(formData.width) || 60,
-          height: parseFloat(formData.height) || 20,
-          birdCapacity: parseInt(formData.birdCapacity) || 25000,
-          placementDate: formData.placementDate,
-          fanCount: parseInt(formData.fanCount) || 8,
-          fanSize: formData.fanInputType === 'size' ? formData.fanSize : '',
-          fanCFM: formData.fanInputType === 'cfm' ? formData.fanCFM : '',
-          coolingPadLength: parseFloat(formData.coolingPadLength) || 60,
-          padHeight: parseFloat(formData.padHeight) || 6,
-        } 
-      });
+      setIsSubmitting(true);
+      
+      const payload = { 
+        ...formData,
+        length: parseFloat(formData.length) || 200,
+        width: parseFloat(formData.width) || 60,
+        height: parseFloat(formData.height) || 20,
+        birdCapacity: parseInt(formData.birdCapacity) || 25000,
+        placementDate: formData.placementDate,
+        fanCount: parseInt(formData.fanCount) || 8,
+        fanSize: formData.fanInputType === 'size' ? formData.fanSize : '',
+        fanCFM: formData.fanInputType === 'cfm' ? formData.fanCFM : '',
+        coolingPadLength: parseFloat(formData.coolingPadLength) || 60,
+        padHeight: parseFloat(formData.padHeight) || 6,
+      };
+
+      try {
+        // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE:
+        const scriptURL = "https://script.google.com/macros/s/AKfycbyuyHQSK6eU_abo_XIQXIUR5Fwd5Ob97nyY2GZ3dDmW_VEpbA6pimGU9kqC1CtaFkSG/exec"; 
+        
+        if (scriptURL) {
+          await fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          });
+        } else {
+          console.warn("Google Sheet URL is not configured. Data won't be saved to sheets.");
+        }
+        
+        navigate('/farm-preview', { state: payload });
+      } catch (error) {
+        console.error("Error submitting to Google Sheet:", error);
+        alert("There was an error saving your data, but we'll continue to the preview.");
+        navigate('/farm-preview', { state: payload });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -225,7 +252,6 @@ const FarmInfrastructure = () => {
                         <option value="">Select controller model</option>
                         <option value="Z800">Z800</option>
                         <option value="Z1000">Z1000</option>
-                        <option value="Z1000 Pro">Z1000 Pro</option>
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center">
                         <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -470,13 +496,14 @@ const FarmInfrastructure = () => {
               
               <motion.button
                 type="submit"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.985 }}
+                disabled={isSubmitting}
+                whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+                whileTap={{ scale: isSubmitting ? 1 : 0.985 }}
                 onClick={handleSubmit}
-                className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-brand to-brand-dark hover:brightness-110 text-lg font-semibold text-white rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-brand/20 transition-all cursor-pointer"
+                className={`w-full sm:w-auto px-10 py-4 ${isSubmitting ? 'bg-zinc-700' : 'bg-gradient-to-r from-brand to-brand-dark hover:brightness-110'} text-lg font-semibold text-white rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-brand/20 transition-all cursor-pointer`}
               >
-                Continue to Preview
-                <ArrowRight size={24} strokeWidth={2.5} />
+                {isSubmitting ? 'Saving...' : 'Continue to Preview'}
+                {!isSubmitting && <ArrowRight size={24} strokeWidth={2.5} />}
               </motion.button>
             </div>
           </motion.div>

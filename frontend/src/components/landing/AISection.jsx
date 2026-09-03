@@ -35,48 +35,51 @@ export default function AISection() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
+          className="space-y-6"
         >
-          <span className="rounded-full border border-brand/20 bg-brand/10 px-4 py-2 text-sm text-brand font-semibold">
+          <span className="inline-flex items-center gap-2 rounded-full border border-brand/35 bg-brand/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-brand">
             ZSE Engine
           </span>
 
-          <h2 className="mt-6 text-4xl font-bold leading-tight md:text-5xl">
+          <h2 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-[1.15]">
             Let ZSE Calculate Your
-            <span className="block bg-gradient-to-r from-brand via-[#ff4c7d] to-[#ff82a5] bg-clip-text text-transparent">
+            <span className="block text-brand-gradient mt-2 py-0.5">
               Controller Settings
             </span>
           </h2>
 
-          <p className="mt-6 max-w-xl text-lg leading-8 text-gray-400">
-            Zivial ZSE processes bird capacity, placement dates, and house geometry coordinates 
+          <p className="max-w-xl text-xs md:text-sm leading-relaxed text-gray-400">
+            ZSE processes bird capacity, placement dates, and house geometry coordinates 
             to calculate exact heating limits, ventilation cycles, cooling pump delays, and lighting schedules.
           </p>
 
-          <div className="mt-10 space-y-4">
+          <div className="space-y-3 pt-2">
             {capabilities.map((item) => (
               <div
                 key={item}
-                className="flex items-center gap-3"
+                className="flex items-center gap-3 text-xs md:text-sm"
               >
                 <CheckCircle2
-                  size={20}
+                  size={18}
                   className="text-brand"
                 />
 
-                <span className="text-gray-300">
+                <span className="text-gray-300 font-medium">
                   {item}
                 </span>
               </div>
             ))}
           </div>
 
-          <button 
+          <motion.button 
             onClick={() => navigate("/farm-infrastructure")}
-            className="mt-10 flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand to-brand-dark px-8 py-4 font-semibold text-white transition hover:scale-105 cursor-pointer shadow-lg shadow-brand/20 hover:shadow-brand/40"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="group flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-dark px-6 py-3.5 text-xs md:text-sm font-semibold text-white transition-all duration-300 cursor-pointer shadow-lg shadow-brand/20 hover:shadow-brand/40"
           >
             Run ZSE Calculations
-            <ArrowRight size={18} />
-          </button>
+            <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+          </motion.button>
         </motion.div>
 
         {/* Right Side */}
@@ -86,27 +89,27 @@ export default function AISection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+          <div className="rounded-3xl border border-white/5 bg-gradient-to-b from-white/[0.03] to-transparent p-8 backdrop-blur-xl hover:border-brand/30 hover:shadow-[0_12px_30px_rgba(3,7,18,0.5)] transition-all duration-300">
 
             {/* Header */}
             <div className="mb-8 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-gradient-to-r from-brand to-brand-dark p-3">
-                  <Cpu className="text-white" />
+                <div className="rounded-xl bg-gradient-to-r from-brand to-brand-dark p-2.5 shadow-md shadow-brand/20">
+                  <Cpu className="text-white" size={22} />
                 </div>
 
                 <div>
-                  <h3 className="font-semibold">
-                    Zivial ZSE Core
+                  <h3 className="font-bold text-white tracking-tight">
+                    ZSE Core
                   </h3>
 
-                  <p className="text-sm text-gray-400">
+                  <p className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">
                     Math Live Status
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-full bg-brand/20 px-4 py-2 text-sm text-brand font-semibold">
+              <div className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
                 SYSTEM ONLINE
               </div>
             </div>
@@ -114,48 +117,48 @@ export default function AISection() {
             {/* Cards */}
             <div className="space-y-4">
 
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="rounded-2xl border border-white/5 bg-[#07080c]/60 p-4 transition-all duration-300 hover:border-brand/20 hover:bg-white/[0.04]">
                 <div className="flex items-center gap-3">
-                  <TrendingUp className="text-brand" />
+                  <TrendingUp className="text-brand" size={18} />
 
                   <div>
-                    <h4 className="font-semibold">
+                    <h4 className="font-bold text-sm text-white">
                       Geometry Calculation
                     </h4>
 
-                    <p className="text-sm text-gray-400">
+                    <p className="text-xs text-gray-500 mt-0.5">
                       Computing Shed Area & Bird Density
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="rounded-2xl border border-white/5 bg-[#07080c]/60 p-4 transition-all duration-300 hover:border-brand/20 hover:bg-white/[0.04]">
                 <div className="flex items-center gap-3">
-                  <Cpu className="text-brand" />
+                  <Cpu className="text-brand" size={18} />
 
                   <div>
-                    <h4 className="font-semibold">
+                    <h4 className="font-bold text-sm text-white">
                       Ventilation Logic
                     </h4>
 
-                    <p className="text-sm text-gray-400">
+                    <p className="text-xs text-gray-500 mt-0.5">
                       Resolving Level 1-16 Fan Assignments
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="rounded-2xl border border-white/5 bg-[#07080c]/60 p-4 transition-all duration-300 hover:border-brand/20 hover:bg-white/[0.04]">
                 <div className="flex items-center gap-3">
-                  <Sparkles className="text-brand" />
+                  <Sparkles className="text-brand" size={18} />
 
                   <div>
-                    <h4 className="font-semibold">
+                    <h4 className="font-bold text-sm text-white">
                       Climate curves compilation
                     </h4>
 
-                    <p className="text-sm text-gray-400">
+                    <p className="text-xs text-gray-500 mt-0.5">
                       Export Ready Celsius targets
                     </p>
                   </div>
@@ -166,13 +169,13 @@ export default function AISection() {
 
             {/* Progress */}
             <div className="mt-8">
-              <div className="mb-2 flex justify-between text-sm text-gray-400">
+              <div className="mb-2 flex justify-between text-xs text-gray-400 font-medium">
                 <span>Calculations Progress</span>
 
                 <span>100%</span>
               </div>
 
-              <div className="h-3 overflow-hidden rounded-full bg-white/10">
+              <div className="h-2 overflow-hidden rounded-full bg-white/5 border border-white/5">
                 <motion.div
                   animate={{
                     width: ["10%", "100%"],
@@ -181,6 +184,7 @@ export default function AISection() {
                     repeat: Infinity,
                     duration: 3,
                     repeatType: "reverse",
+                    ease: "easeInOut",
                   }}
                   className="h-full rounded-full bg-gradient-to-r from-brand to-brand-dark"
                 />

@@ -1,18 +1,24 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-const particles = Array.from({ length: 20 }, (_, index) => ({
-  id: index,
-  size: Math.floor(Math.random() * 8) + 4,
-  left: `${Math.random() * 100}%`,
-  top: `${Math.random() * 100}%`,
-  duration: Math.random() * 8 + 8,
-  delay: Math.random() * 5,
-}));
-
 export default function BackgroundParticles() {
+  const [particles, setParticles] = useState([]);
+
+  useEffect(() => {
+    // Generate particles on client side to avoid hydration mismatch
+    const generated = Array.from({ length: 15 }, (_, index) => ({
+      id: index,
+      size: Math.floor(Math.random() * 6) + 3,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      duration: Math.random() * 8 + 8,
+      delay: Math.random() * 4,
+    }));
+    setParticles(generated);
+  }, []);
+
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-
       {/* Base Background */}
       <div className="absolute inset-0 bg-[#030712]" />
 
@@ -41,7 +47,7 @@ export default function BackgroundParticles() {
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
-          className="absolute rounded-full bg-brand/30"
+          className="absolute rounded-full bg-brand/35"
           style={{
             width: particle.size,
             height: particle.size,
@@ -49,9 +55,9 @@ export default function BackgroundParticles() {
             top: particle.top,
           }}
           animate={{
-            y: [-20, 20, -20],
-            opacity: [0.15, 0.6, 0.15],
-            scale: [1, 1.3, 1],
+            y: [-15, 15, -15],
+            opacity: [0.1, 0.45, 0.1],
+            scale: [1, 1.25, 1],
           }}
           transition={{
             duration: particle.duration,
@@ -61,7 +67,6 @@ export default function BackgroundParticles() {
           }}
         />
       ))}
-
     </div>
   );
 }

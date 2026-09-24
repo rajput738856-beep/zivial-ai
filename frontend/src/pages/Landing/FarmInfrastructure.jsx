@@ -15,6 +15,7 @@ const FarmInfrastructure = () => {
     farmName: initialData.farmName || '',
     ownerName: initialData.ownerName || '',
     location: initialData.location || '',
+    breed: initialData.breed || '',
     controllerModel: initialData.controllerModel || '',
     length: initialData.length || '',
     width: initialData.width || '',
@@ -62,10 +63,9 @@ const FarmInfrastructure = () => {
     if (!formData.farmName.trim()) newErrors.farmName = 'Farm name is required';
     if (!formData.ownerName.trim()) newErrors.ownerName = 'Owner name is required';
     if (!formData.location.trim()) {
-      newErrors.location = 'Pincode is required';
-    } else if (!/^\d{6}$/.test(formData.location.trim())) {
-      newErrors.location = 'Enter a valid 6-digit pincode';
+      newErrors.location = 'Location is required';
     }
+    if (!formData.breed) newErrors.breed = 'Breed is required';
     if (!formData.controllerModel) newErrors.controllerModel = 'Controller model is required';
     if (!formData.length) newErrors.length = 'Length is required';
     if (!formData.width) newErrors.width = 'Width is required';
@@ -112,13 +112,15 @@ const FarmInfrastructure = () => {
         const scriptURL = "https://script.google.com/macros/s/AKfycbyuyHQSK6eU_abo_XIQXIUR5Fwd5Ob97nyY2GZ3dDmW_VEpbA6pimGU9kqC1CtaFkSG/exec"; 
         
         if (scriptURL) {
+          const formBody = new URLSearchParams(payload).toString();
+          
           await fetch(scriptURL, {
             method: 'POST',
             mode: 'no-cors',
             headers: {
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: JSON.stringify(payload),
+            body: formBody,
           });
         } else {
           console.warn("Google Sheet URL is not configured. Data won't be saved to sheets.");
@@ -227,17 +229,48 @@ const FarmInfrastructure = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-zinc-400 mb-2.5">Pincode <span className="text-brand">*</span></label>
+                      <label className="block text-sm font-medium text-zinc-400 mb-2.5">Location <span className="text-brand">*</span></label>
                       <input
                         type="text"
                         name="location"
                         value={formData.location}
                         onChange={handleChange}
-                        placeholder="e.g. 110001"
-                        maxLength={6}
+                        placeholder="e.g. Pune, Maharashtra"
                         className="w-full bg-zinc-950 border border-zinc-700 rounded-2xl px-7 py-4 text-lg focus:outline-none focus:border-brand transition-colors placeholder-zinc-500"
                       />
                       {errors.location && <p className="text-brand text-sm mt-2">{errors.location}</p>}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-2.5">Breed <span className="text-brand">*</span></label>
+                      <div className="relative">
+                        <select
+                          name="breed"
+                          value={formData.breed}
+                          onChange={handleChange}
+                          className="w-full bg-zinc-950 border border-zinc-700 rounded-2xl px-5 sm:px-7 py-4 text-base sm:text-lg focus:outline-none focus:border-brand transition-colors appearance-none pr-10"
+                        >
+                          <option value="">Select bird breed</option>
+                          <option value="Cobb 500">Cobb 500</option>
+                          <option value="Vencobb">Vencobb</option>
+                          <option value="Vencobb 400">Vencobb 400</option>
+                          <option value="Vencobb 400Y">Vencobb 400Y</option>
+                          <option value="Ross 308">Ross 308</option>
+                          <option value="Ross 308 AP">Ross 308 AP</option>
+                          <option value="Ross 308 Modified AP 95">Ross 308 Modified AP 95</option>
+                          <option value="Hubbard">Hubbard</option>
+                          <option value="Hubbard Flex">Hubbard Flex</option>
+                          <option value="Indian River">Indian River</option>
+                          <option value="Arbor Acres">Arbor Acres</option>
+                          <option value="Arbor Acres Plus">Arbor Acres Plus</option>
+                          <option value="Sunbro">Sunbro</option>
+                          <option value="Marshall">Marshall</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center">
+                          <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                      </div>
+                      {errors.breed && <p className="text-brand text-sm mt-2">{errors.breed}</p>}
                     </div>
 
                     <div>

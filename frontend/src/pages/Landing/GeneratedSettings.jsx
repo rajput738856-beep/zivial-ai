@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Download, Printer, Save, ArrowLeft, CheckCircle, Fan } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import toast from 'react-hot-toast';
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
@@ -15,6 +16,7 @@ const GeneratedSettings = () => {
   const [recipe, setRecipe] = useState(null);
   const [recipeData, setRecipeData] = useState(null);
   const [calcParams, setCalcParams] = useState(null);
+  const [farmInputData, setFarmInputData] = useState(null);
 
   useEffect(() => {
     if (location.state?.recipe) {
@@ -25,6 +27,9 @@ const GeneratedSettings = () => {
       if (location.state.recipe.calculatedParameters) {
         setCalcParams(location.state.recipe.calculatedParameters);
       }
+    }
+    if (location.state?.formData) {
+      setFarmInputData(location.state.formData);
     }
   }, [location.state]);
 
@@ -213,7 +218,7 @@ const GeneratedSettings = () => {
             </div>
           </motion.div>
 
-          {/* Engineering Parameters Card */}
+          {/* Farm Input Summary Card */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -222,29 +227,160 @@ const GeneratedSettings = () => {
           >
             <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3">
               <span className="h-px w-8 bg-brand"></span>
-              Poultry House Calculations (Batch Analysis)
+              Farm Input Summary
             </h2>
             <div className="bg-white/5 border border-white/10 rounded-3xl p-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 text-sm">
+              <div className="bg-zinc-950/60 rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
+                <div className="text-zinc-500 mb-2 font-medium">Shed Dimensions (L×W×H)</div>
+                <div className="text-xl font-semibold text-brand">
+                  {farmInputData?.length || '--'} × {farmInputData?.width || '--'} × {farmInputData?.height || '--'} ft
+                </div>
+              </div>
+              <div className="bg-zinc-950/60 rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
+                <div className="text-zinc-500 mb-2 font-medium">Bird Capacity</div>
+                <div className="text-xl font-semibold text-brand">{farmInputData?.birdCapacity ? Number(farmInputData.birdCapacity).toLocaleString() : '--'} birds</div>
+              </div>
+              <div className="bg-zinc-950/60 rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
+                <div className="text-zinc-500 mb-2 font-medium">Fan Setup</div>
+                <div className="text-xl font-semibold text-brand">{farmInputData?.fanCount || '--'} × {farmInputData?.fanSize || '--'}</div>
+              </div>
+              <div className="bg-zinc-950/60 rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
+                <div className="text-zinc-500 mb-2 font-medium">Breed</div>
+                <div className="text-xl font-semibold text-brand">{farmInputData?.breed || '--'}</div>
+              </div>
+              <div className="bg-zinc-950/60 rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
+                <div className="text-zinc-500 mb-2 font-medium">Placement Date</div>
+                <div className="text-xl font-semibold text-brand">{farmInputData?.placementDate || '--'}</div>
+              </div>
               <div className="bg-zinc-950/60 rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
                 <div className="text-zinc-500 mb-2 font-medium">Total Fan Capacity</div>
                 <div className="text-xl font-semibold text-brand">{calcParams.totalFanCFM}</div>
               </div>
               <div className="bg-zinc-950/60 rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
-                <div className="text-zinc-500 mb-2 font-medium">Total Required CFM (Minimum)</div>
-                <div className="text-xl font-semibold text-brand text-brand-gradient">{calcParams.totalRequiredCFMMin || calcParams.minimumRequiredCFM}</div>
+                <div className="text-zinc-500 mb-2 font-medium">Shed Area</div>
+                <div className="text-xl font-semibold text-brand">{calcParams.areaSqFt}</div>
               </div>
               <div className="bg-zinc-950/60 rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
-                <div className="text-zinc-500 mb-2 font-medium">Total Required CFM (Maximum)</div>
-                <div className="text-xl font-semibold text-brand text-brand-gradient">{calcParams.totalRequiredCFMMax || calcParams.maximumRequiredCFM}</div>
+                <div className="text-zinc-500 mb-2 font-medium">Shed Volume</div>
+                <div className="text-xl font-semibold text-brand">{calcParams.volumeCuFt}</div>
               </div>
               <div className="bg-zinc-950/60 rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
-                <div className="text-zinc-500 mb-2 font-medium">Required Air Speed (Minimum)</div>
-                <div className="text-xl font-semibold text-brand">{calcParams.requiredAirSpeedMin}</div>
+                <div className="text-zinc-500 mb-2 font-medium">Cooling Pad Surface</div>
+                <div className="text-xl font-semibold text-brand">{calcParams.coolingPadArea}</div>
               </div>
               <div className="bg-zinc-950/60 rounded-2xl p-5 border border-white/5 flex flex-col justify-between">
-                <div className="text-zinc-500 mb-2 font-medium">Required Air Speed (Maximum)</div>
-                <div className="text-xl font-semibold text-brand">{calcParams.requiredAirSpeedMax}</div>
+                <div className="text-zinc-500 mb-2 font-medium">Flock Density</div>
+                <div className="text-xl font-semibold text-brand">{calcParams.birdDensity}</div>
               </div>
+            </div>
+          </motion.div>
+
+          {/* Temperature & Humidity Set-Point Chart */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-12"
+          >
+            <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3">
+              <span className="h-px w-8 bg-brand"></span>
+              Temperature & Humidity Curve (by Bird Age)
+            </h2>
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
+              <ResponsiveContainer width="100%" height={420}>
+                <AreaChart
+                  data={(() => {
+                    const chartData = [];
+                    if (recipeData?.stages) {
+                      recipeData.stages.forEach((s) => {
+                        chartData.push({
+                          day: parseInt(s.dayRange || s.day),
+                          target: parseFloat(s.targetTemp),
+                          heating: parseFloat(s.heatingTemp),
+                          cooling: parseFloat(s.coolingTemp),
+                          minAlarm: parseFloat(s.minAlarm),
+                          maxAlarm: parseFloat(s.maxAlarm),
+                        });
+                      });
+                    }
+                    // add humidity data points
+                    if (recipeData?.humidity) {
+                      recipeData.humidity.forEach((h) => {
+                        const existing = chartData.find(d => d.day === h.day);
+                        if (existing) {
+                          existing.humidity = h.humidity;
+                        } else {
+                          chartData.push({ day: h.day, humidity: h.humidity });
+                        }
+                      });
+                    }
+                    chartData.sort((a, b) => a.day - b.day);
+                    
+                    // Forward-fill humidity so the line continues to the end
+                    let lastHum = null;
+                    chartData.forEach(d => {
+                      if (d.humidity !== undefined) lastHum = d.humidity;
+                      else if (lastHum !== null) d.humidity = lastHum;
+                    });
+
+                    return chartData;
+                  })()}
+                  margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
+                >
+                  <defs>
+                    <linearGradient id="gradTarget" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#d11243" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#d11243" stopOpacity={0.02} />
+                    </linearGradient>
+                    <linearGradient id="gradHumidity" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#38bdf8" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <XAxis 
+                    dataKey="day" 
+                    height={50}
+                    stroke="#71717a" 
+                    tick={{ fill: '#a1a1aa', fontSize: 12 }} 
+                    label={{ value: 'Bird Age (Days)', position: 'insideBottom', offset: -10, fill: '#a1a1aa', fontSize: 13 }}
+                  />
+                  <YAxis 
+                    yAxisId="temp"
+                    stroke="#71717a" 
+                    tick={{ fill: '#a1a1aa', fontSize: 12 }} 
+                    label={{ value: 'Temperature (°C)', angle: -90, position: 'insideLeft', fill: '#a1a1aa', fontSize: 13 }}
+                    domain={['dataMin - 3', 'dataMax + 3']}
+                  />
+                  <YAxis 
+                    yAxisId="hum"
+                    orientation="right"
+                    stroke="#38bdf8" 
+                    tick={{ fill: '#38bdf8', fontSize: 12 }} 
+                    label={{ value: 'Humidity (%)', angle: 90, position: 'insideRight', fill: '#38bdf8', fontSize: 13 }}
+                    domain={[30, 100]}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#18181b', 
+                      border: '1px solid rgba(255,255,255,0.1)', 
+                      borderRadius: '12px', 
+                      color: '#fff',
+                      fontSize: '13px'
+                    }} 
+                    labelFormatter={(v) => `Day ${v}`}
+                  />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: '16px', fontSize: '13px' }}
+                  />
+                  <Area yAxisId="temp" type="monotone" dataKey="target" stroke="#d11243" strokeWidth={2.5} fill="url(#gradTarget)" name="Target Temp (°C)" connectNulls />
+                  <Line yAxisId="temp" type="monotone" dataKey="heating" stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="5 5" dot={{ r: 3 }} name="Heating Temp (°C)" connectNulls />
+                  <Line yAxisId="temp" type="monotone" dataKey="cooling" stroke="#22d3ee" strokeWidth={1.5} strokeDasharray="5 5" dot={{ r: 3 }} name="Cooling Temp (°C)" connectNulls />
+                  <Line yAxisId="temp" type="monotone" dataKey="minAlarm" stroke="#ef4444" strokeWidth={1} strokeDasharray="3 3" dot={false} name="Min Alarm (°C)" connectNulls />
+                  <Line yAxisId="temp" type="monotone" dataKey="maxAlarm" stroke="#f87171" strokeWidth={1} strokeDasharray="3 3" dot={false} name="Max Alarm (°C)" connectNulls />
+                  <Area yAxisId="hum" type="monotone" dataKey="humidity" stroke="#38bdf8" strokeWidth={2} fill="url(#gradHumidity)" name="Humidity Set Point (%)" connectNulls />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </motion.div>
 
@@ -286,6 +422,7 @@ const GeneratedSettings = () => {
                       <thead>
                         <tr className="border-b border-white/10 text-xs uppercase tracking-widest text-zinc-400 bg-zinc-950/20">
                           <th className="px-4 py-6 font-medium border-r border-white/10">Stage</th>
+                          <th className="px-4 py-6 font-medium border-r border-white/10">Day</th>
                           <th className="px-4 py-6 font-medium border-r border-white/10">Target Temp</th>
                           <th className="px-4 py-6 font-medium border-r border-white/10">Heating Temp</th>
                           <th className="px-4 py-6 font-medium border-r border-white/10">Cooling Temp</th>
@@ -300,6 +437,7 @@ const GeneratedSettings = () => {
                         {recipeData.stages.map((stage, idx) => (
                           <tr key={idx} className="hover:bg-white/5 transition-colors">
                             <td className="px-4 py-5 font-semibold text-zinc-300 border-r border-white/5">STAGE {stage.stage}</td>
+                            <td className="px-4 py-5 font-bold text-zinc-200 border-r border-white/5">{stage.dayRange || stage.day}</td>
                             <td className="px-4 py-5 text-brand font-bold border-r border-white/5">{stage.targetTemp}</td>
                             <td className="px-4 py-5 border-r border-white/5">{stage.heatingTemp}</td>
                             <td className="px-4 py-5 border-r border-white/5 text-brand">{stage.coolingTemp}</td>
@@ -405,7 +543,7 @@ const GeneratedSettings = () => {
                                 } else if (fanStatus === "CYCLE") {
                                   // CYCLE / ROTATION
                                   circleClass = "border-sky-400 bg-sky-500/15 text-sky-400 shadow-md shadow-sky-500/5";
-                                  label = "CYCLE";
+                                  label = "ROTATION";
                                   labelClass = "text-sky-400 font-semibold";
                                   iconClass = "animate-spin [animation-duration:4s]";
                                   if (detail && detail.dutyPercent && !detail.isStandby) {
@@ -652,23 +790,121 @@ const GeneratedSettings = () => {
 
         {/* Calculations Section */}
         <div className="space-y-4 print-section">
-          <h2 className="text-2xl font-bold border-b border-gray-400 pb-2">1. Engineering Calculations & Parameters</h2>
+          <h2 className="text-2xl font-bold border-b border-gray-400 pb-2">1. Farm Input Summary & Parameters</h2>
           <div className="grid grid-cols-3 gap-y-3 gap-x-6 text-sm">
-            <div><strong>Bird Age:</strong> {calcParams.birdAgeDays} Days</div>
-            <div><strong>Est. Bird Weight:</strong> {calcParams.estimatedBirdWeight}</div>
-            <div><strong>Total Flock Weight:</strong> {calcParams.totalFlockWeight}</div>
+            <div><strong>Shed Dimensions:</strong> {farmInputData?.length || '--'} × {farmInputData?.width || '--'} × {farmInputData?.height || '--'} ft</div>
+            <div><strong>Bird Capacity:</strong> {farmInputData?.birdCapacity ? Number(farmInputData.birdCapacity).toLocaleString() : '--'} birds</div>
+            <div><strong>Breed:</strong> {farmInputData?.breed || '--'}</div>
             <div><strong>Shed Area:</strong> {calcParams.areaSqFt}</div>
             <div><strong>Shed Volume:</strong> {calcParams.volumeCuFt}</div>
             <div><strong>Flock Density:</strong> {calcParams.birdDensity}</div>
-            <div><strong>Required Air Speed:</strong> {calcParams.requiredAirSpeed}</div>
-            <div><strong>Air Exchange Cycle:</strong> {calcParams.airExchangeSeconds}</div>
-            <div><strong>Required CFM:</strong> {calcParams.requiredCFM}</div>
+            <div><strong>Fan Setup:</strong> {farmInputData?.fanCount || '--'} × {farmInputData?.fanSize || '--'}</div>
             <div><strong>Single Fan Rating:</strong> {calcParams.singleFanCFM}</div>
             <div><strong>Total Fan Capacity:</strong> {calcParams.totalFanCFM}</div>
             <div><strong>Cooling Pad Surface:</strong> {calcParams.coolingPadArea}</div>
+            <div><strong>Placement Date:</strong> {farmInputData?.placementDate || '--'}</div>
+            <div><strong>Required CFM:</strong> {calcParams.requiredCFM}</div>
           </div>
         </div>
+        {/* Temperature & Humidity Chart (Print Version) */}
+        <div className="space-y-4 print-section page-break-before">
+          <h2 className="text-2xl font-bold border-b border-gray-400 pb-2">2. Temperature & Humidity Curve</h2>
+          <div className="border border-gray-400 p-4 rounded-lg bg-white flex justify-center">
+              <AreaChart
+                width={750}
+                height={350}
+                data={(() => {
+                  const chartData = [];
+                  if (recipeData?.stages) {
+                    recipeData.stages.forEach((s) => {
+                      chartData.push({
+                        day: parseInt(s.dayRange || s.day),
+                        target: parseFloat(s.targetTemp),
+                        heating: parseFloat(s.heatingTemp),
+                        cooling: parseFloat(s.coolingTemp),
+                        minAlarm: parseFloat(s.minAlarm),
+                        maxAlarm: parseFloat(s.maxAlarm),
+                      });
+                    });
+                  }
+                  if (recipeData?.humidity) {
+                    recipeData.humidity.forEach((h) => {
+                      const existing = chartData.find(d => d.day === h.day);
+                      if (existing) {
+                        existing.humidity = h.humidity;
+                      } else {
+                        chartData.push({ day: h.day, humidity: h.humidity });
+                      }
+                    });
+                  }
+                  chartData.sort((a, b) => a.day - b.day);
+                  
+                  // Forward-fill humidity so the line continues to the end
+                  let lastHum = null;
+                  chartData.forEach(d => {
+                    if (d.humidity !== undefined) lastHum = d.humidity;
+                    else if (lastHum !== null) d.humidity = lastHum;
+                  });
 
+                  return chartData;
+                })()}
+                margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
+              >
+                <defs>
+                  <linearGradient id="gradTargetPrint" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#d11243" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#d11243" stopOpacity={0.01} />
+                  </linearGradient>
+                  <linearGradient id="gradHumidityPrint" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0.01} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis 
+                  dataKey="day" 
+                  height={50}
+                  stroke="#374151" 
+                  tick={{ fill: '#374151', fontSize: 12 }} 
+                  label={{ value: 'Bird Age (Days)', position: 'insideBottom', offset: -10, fill: '#374151', fontSize: 13 }}
+                />
+                <YAxis 
+                  yAxisId="temp"
+                  stroke="#374151" 
+                  tick={{ fill: '#374151', fontSize: 12 }} 
+                  label={{ value: 'Temperature (°C)', angle: -90, position: 'insideLeft', fill: '#374151', fontSize: 13 }}
+                  domain={['dataMin - 3', 'dataMax + 3']}
+                />
+                <YAxis 
+                  yAxisId="hum"
+                  orientation="right"
+                  stroke="#0ea5e9" 
+                  tick={{ fill: '#0ea5e9', fontSize: 12 }} 
+                  label={{ value: 'Humidity (%)', angle: 90, position: 'insideRight', fill: '#0ea5e9', fontSize: 13 }}
+                  domain={[30, 100]}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#ffffff', 
+                    border: '1px solid #d1d5db', 
+                    borderRadius: '8px', 
+                    color: '#111827',
+                    fontSize: '13px'
+                  }} 
+                  labelFormatter={(v) => `Day ${v}`}
+                />
+                <Legend 
+                  wrapperStyle={{ paddingTop: '16px', fontSize: '13px', color: '#111827' }}
+                />
+                <Area isAnimationActive={false} yAxisId="temp" type="monotone" dataKey="target" stroke="#d11243" strokeWidth={2.5} fill="url(#gradTargetPrint)" name="Target Temp (°C)" connectNulls />
+                <Line isAnimationActive={false} yAxisId="temp" type="monotone" dataKey="heating" stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="5 5" dot={{ r: 3 }} name="Heating Temp (°C)" connectNulls />
+                <Line isAnimationActive={false} yAxisId="temp" type="monotone" dataKey="cooling" stroke="#06b6d4" strokeWidth={1.5} strokeDasharray="5 5" dot={{ r: 3 }} name="Cooling Temp (°C)" connectNulls />
+                <Line isAnimationActive={false} yAxisId="temp" type="monotone" dataKey="minAlarm" stroke="#ef4444" strokeWidth={1} strokeDasharray="3 3" dot={false} name="Min Alarm (°C)" connectNulls />
+                <Line isAnimationActive={false} yAxisId="temp" type="monotone" dataKey="maxAlarm" stroke="#f87171" strokeWidth={1} strokeDasharray="3 3" dot={false} name="Max Alarm (°C)" connectNulls />
+                <Area isAnimationActive={false} yAxisId="hum" type="monotone" dataKey="humidity" stroke="#0ea5e9" strokeWidth={2} fill="url(#gradHumidityPrint)" name="Humidity Set Point (%)" connectNulls />
+              </AreaChart>
+          </div>
+        </div>
         {/* Stage Table */}
         <div className="space-y-4 page-break-before print-section">
           <h2 className="text-2xl font-bold border-b border-gray-400 pb-2">2. Stage Settings</h2>
@@ -739,11 +975,19 @@ const GeneratedSettings = () => {
                   <td className="border border-gray-400 p-1">{vent.fanOn}</td>
                   <td className="border border-gray-400 p-1">{vent.fanOff}</td>
                   <td className="border border-gray-400 p-1 font-bold">{vent.fanPct}</td>
-                  {vent.fans && vent.fans.map((fanStatus, fIdx) => (
-                    <td key={fIdx} className="border border-gray-400 p-1 text-[10px] font-semibold">
-                      {fanStatus === "ON" ? "ON" : fanStatus === "ON/OFF" ? "ON/OFF" : "-"}
-                    </td>
-                  ))}
+                  {vent.fans && vent.fans.map((fanStatus, fIdx) => {
+                    let printLabel = "-";
+                    if (fanStatus === "ON") printLabel = "ON";
+                    else if (fanStatus === "TIMER") printLabel = "TIMER";
+                    else if (fanStatus === "CYCLE") printLabel = "CYCLE";
+                    else if (fanStatus === "ON/OFF") printLabel = "ON/OFF";
+
+                    return (
+                      <td key={fIdx} className="border border-gray-400 p-1 text-[9px] font-semibold">
+                        {printLabel}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>

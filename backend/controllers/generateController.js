@@ -12,6 +12,7 @@ import { calculateBirdHeat } from "../src/calculations/birdHeatCalculator.js";
 import { calculateMinimumVentilation } from "../src/calculations/minimumVentilationCalculator.js";
 import { calculateTransitionVentilation } from "../src/calculations/transitionVentilationCalculator.js";
 import { calculateTunnelVentilation } from "../src/calculations/tunnelVentilationCalculator.js";
+import { generateZ1000Recipe } from "../src/calculations/batchRecipeGenerator.js";
 import { FAN_DATABASE } from "../src/config/fanDatabase.js";
 import { STAGE_LOOKUP } from "../config/poultryConfig.js";
 import { BREED_PROFILES } from "../config/breedProfiles.js";
@@ -106,8 +107,8 @@ export const generateRecipe = async (req, res) => {
         ventMax: "1"
       }));
     } else {
-      activeStage = getStageSettings(birdAge);
-      stages = getAllStagesForRecipe();
+      activeStage = getStageSettings(birdAge, null, breed);
+      stages = getAllStagesForRecipe(null, breed);
     }
     const targetTempNum = parseFloat(activeStage.rawValues.target) || 30.0;
     
@@ -160,12 +161,16 @@ export const generateRecipe = async (req, res) => {
 
     // Shared structures for decoupled calculator arguments
     const farmConfig = {
+      farmName: farmName,
       length: lengthNum,
       width: widthNum,
       height: heightNum,
       fanCount: fanCountNum,
       fanSize: resolvedFanSize,
-      coolingPad: coolingPad
+      coolingPad: coolingPad,
+      padLength: coolingPadLengthNum,
+      padHeight: padHeightNum,
+      birdCapacity: birdCapacityNum
     };
     const birdData = {
       age: birdAge,
@@ -322,6 +327,9 @@ export const generateRecipe = async (req, res) => {
       return new Date().toLocaleDateString('en-US', options);
     };
 
+    // Generate Z1000 Batch Recipe
+    const batchRecipe = generateZ1000Recipe(farmConfig, breed, FAN_DATABASE);
+
     const recipe = {
       recipeName: `${farmName.replace(/farm/i, "").trim()} ZSE Recipe`,
       farmName: farmName,
@@ -408,23 +416,59 @@ export const generateRecipe = async (req, res) => {
         }
       },
       recipeData: {
-        stages: stages.map((s, idx) => {
-          const mapping = stageVentilation && stageVentilation[idx];
-          if (mapping) {
-            return {
-              ...s,
-              ventSafe: String(mapping.ventSafe),
-              ventMin: String(mapping.ventMin),
-              ventMax: String(mapping.ventMax)
-            };
-          }
-          return s;
-        }),
-        ventilation: levels,
-        stageVentilation,
-        ventilationWarnings,
-        cooling,
-        humidity: humDetails.humidityTreatment,
+        stages: batchRecipe.stageSettingsTable.map(s => ({
+          stageNum: s.stage,
+          stage: s.stage,
+          day: s.day,
+          dayRange: String(s.day),
+          targetTemp: `${s.targetTemp}°C`,
+          heatingTemp: `${s.heatingTemp}°C`,
+          coolingTemp: `${s.coolingTemp}°C`,
+          minAlarm: `${s.minTempAlarm}°C`,
+          maxAlarm: `${s.maxTempAlarm}°C`,
+          ventSafe: String(s.ventLevelSafe),
+          ventMin: String(s.ventLevelMin),
+          ventMax: String(s.ventLevelMax),
+          target: s.targetTemp,
+          heat: s.heatingTemp,
+          cool: s.coolingTemp
+        })),
+        ventilation: batchRecipe.ventilationLevelTable.map(v => ({
+          level: v.level,
+          cfm: v.targetCFM,
+          tDelta: v.tDiff,
+          fanOn: v.fanOnTimeSec,
+          fanOff: v.fanOffTimeSec,
+          fanPct: `${v.vfdValue}%`,
+          fans: v.fanStates,
+          errorPercent: 0,
+          airSpeedFtMin: 0,
+          airSpeedMs: 0,
+          fanDetails: { continuous: v.continuousFans, timer: v.timerFans, rotational: v.rotationalFans }
+        })),
+        stageVentilation: batchRecipe.stageSettingsTable, // just to pass something
+        ventilationWarnings: [],
+        cooling: batchRecipe.coolingSettingsTable.map(c => ({
+          day: c.day,
+          startTime: c.start,
+          stopTime: c.stop,
+          onTime: c.onTimeSec,
+          minOff: c.minOffSec,
+          maxOff: c.maxOffSec,
+          offRH: c.humidityOff,
+          tDiff: c.tDiff,
+          foggerOn: c.foggerOn || 0,
+          foggerMinOff: c.foggerMinOff || 0,
+          foggerMaxOff: c.foggerMaxOff || 0,
+          foggerOffRH: c.foggerOffRH || 0,
+          foggerTDiff: c.foggerTDiff || 0
+        })),
+        humidity: batchRecipe.humidityTreatmentTable.map(h => ({
+          day: h.day,
+          humidity: h.humidity,
+          delay: h.delay,
+          duration: h.duration
+        })),
         lighting,
         feeding,
         humidityTreatment: null

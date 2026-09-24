@@ -25,7 +25,7 @@ const DEFAULT_STAGES = [
   { stageNum: 7, maxAge: 25, target: 25.0, heat: 22.5, cool: 25.0, alarmMin: 21, alarmMax: 29, ventSafe: 11, ventMin: 11, ventMax: 14, dayRange: "35" },
   { stageNum: 8, maxAge: 30, target: 23.9, heat: 21.5, cool: 24.0, alarmMin: 21, alarmMax: 29, ventSafe: 11, ventMin: 13, ventMax: 16, dayRange: "42" },
   { stageNum: 9, maxAge: 35, target: 22.2, heat: 20.5, cool: 22.2, alarmMin: 18, alarmMax: 29, ventSafe: 11, ventMin: 13, ventMax: 16, dayRange: "45" },
-  { stageNum: 10, maxAge: Infinity, target: 21.0, heat: 19.5, cool: 21.0, alarmMin: 18, alarmMax: 28, ventSafe: 13, ventMin: 14, ventMax: 16, dayRange: "46" }
+  { stageNum: 10, maxAge: 42, target: 21.0, heat: 19.5, cool: 21.0, alarmMin: 18, alarmMax: 28, ventSafe: 13, ventMin: 14, ventMax: 16, dayRange: "42+" }
 ];
 
 const FarmPreview = () => {
@@ -201,7 +201,7 @@ const FarmPreview = () => {
           // Normalise Infinity if returned as string "Infinity"
           const parsed = data.stages.map(s => ({
             ...s,
-            maxAge: s.maxAge === "Infinity" || s.maxAge === Infinity ? Infinity : parseFloat(s.maxAge)
+            maxAge: parseFloat(s.maxAge)
           }));
           setStages(parsed);
         }
@@ -235,7 +235,7 @@ const FarmPreview = () => {
   const handleStartEdit = () => {
     setEditStages(stages.map(s => ({
       ...s,
-      maxAge: s.maxAge === Infinity || s.maxAge === "Infinity" ? "Infinity" : String(s.maxAge),
+      maxAge: String(s.maxAge),
       target: String(s.target),
       heat: String(s.heat),
       cool: String(s.cool),
@@ -281,7 +281,7 @@ const FarmPreview = () => {
       return {
         ...s,
         stageNum: parseInt(s.stageNum),
-        maxAge: s.maxAge === "Infinity" || s.maxAge === Infinity ? Infinity : parseFloat(s.maxAge),
+        maxAge: parseFloat(s.maxAge),
         target: parseFloat(s.target),
         heat: parseFloat(s.heat),
         cool: parseFloat(s.cool),
@@ -818,8 +818,16 @@ const FarmPreview = () => {
                     <td className="py-4 px-6 text-center w-40">
                       {isEditing ? (
                         s.stageNum === 10 ? (
-                          <div className="text-center font-semibold text-zinc-500 py-2 bg-zinc-900/40 rounded-xl border border-white/5">
-                            Infinity
+                          <div className="flex flex-col items-center">
+                            <input
+                              type="number"
+                              value={s.maxAge}
+                              onChange={(e) => handleInputChange(idx, 'maxAge', e.target.value)}
+                              className={`text-center bg-zinc-950/80 text-white rounded-xl px-3 py-2 w-full border ${validationErrors[`${s.stageNum}-maxAge`] ? 'border-red-500 focus:ring-1 focus:ring-red-500' : 'border-white/10 focus:border-brand'} focus:outline-none transition-all`}
+                            />
+                            {validationErrors[`${s.stageNum}-maxAge`] && (
+                              <p className="text-[10px] text-red-500 mt-1 font-semibold">{validationErrors[`${s.stageNum}-maxAge`]}</p>
+                            )}
                           </div>
                         ) : (
                           <div className="flex flex-col items-center">
@@ -835,7 +843,7 @@ const FarmPreview = () => {
                           </div>
                         )
                       ) : (
-                        <span>{s.maxAge === Infinity || s.maxAge === "Infinity" ? "Infinity" : `${s.maxAge} days`}</span>
+                        <span>{`${s.maxAge} days`}</span>
                       )}
                     </td>
 

@@ -8,7 +8,7 @@ import { breedTemperatureData } from "../constants/breedTemperatureData.js";
  * Implements 100% accurate thermodynamic logic based on bird biomass and 
  * highly efficient cooling targets (Target + 0.2°C) to save electricity.
  */
-export const generateZ1000Recipe = (farmConfig, breedType = "Cobb 500", fanDb) => {
+export const generateRecipe = (farmConfig, breedType = "Cobb 500", fanDb, controllerModel = "Z1000") => {
   const length = parseFloat(farmConfig.length) || 200;
   const width = parseFloat(farmConfig.width) || 60;
   const height = parseFloat(farmConfig.height) || 20;
@@ -105,6 +105,12 @@ export const generateZ1000Recipe = (farmConfig, breedType = "Cobb 500", fanDb) =
     // As requested: High accuracy cooling. Trigger cooling pump at Target + 0.2 to save fan electricity
     const coolingT = parseFloat((targetT + 0.2).toFixed(1)); 
 
+    // Adjust levels for Z800 (max 8 levels)
+    const isZ800 = controllerModel === "Z800";
+    const maxAllowedLevel = isZ800 ? 8 : 16;
+    if (maxLevel > maxAllowedLevel) maxLevel = maxAllowedLevel;
+    if (minLevel > maxAllowedLevel) minLevel = maxAllowedLevel;
+
     stageSettingsTable.push({
       stage: i + 1,
       day: day,
@@ -119,13 +125,16 @@ export const generateZ1000Recipe = (farmConfig, breedType = "Cobb 500", fanDb) =
     });
   }
 
-  // 3. Ventilation Level Table (Exactly 16 levels)
+  // 3. Ventilation Level Table (Exactly 16 or 8 levels)
   const ventilationLevelTable = [];
   const minCFM = maxRequiredMinCfm * 0.2; // absolute baseline for level 1
+  const isZ800 = controllerModel === "Z800";
+  const numLevels = isZ800 ? 8 : 16;
+  const maxDisplayFans = isZ800 ? 6 : 12;
 
-  for (let l = 1; l <= 16; l++) {
-    // Distribute CFM requirements linearly across 16 levels
-    const targetCFM = Math.round(minCFM + ((l - 1) / 15) * (totalInstalledCFM - minCFM));
+  for (let l = 1; l <= numLevels; l++) {
+    // Distribute CFM requirements linearly across levels
+    const targetCFM = Math.round(minCFM + ((l - 1) / (numLevels - 1)) * (totalInstalledCFM - minCFM));
     
     // Select optimal fans
     const continuousFans = Math.min(fanCount, Math.floor(targetCFM / singleFanCfm));
@@ -144,17 +153,26 @@ export const generateZ1000Recipe = (farmConfig, breedType = "Cobb 500", fanDb) =
 
     // VFD Logic
     let vfdSpeed = 100;
-    if (l <= 6) vfdSpeed = Math.min(100, 50 + (l - 1) * 10);
-    else vfdSpeed = Math.min(100, 80 + (l - 7) * 4);
+    if (isZ800) {
+      vfdSpeed = Math.min(100, 60 + (l - 1) * 10);
+    } else {
+      if (l <= 6) vfdSpeed = Math.min(100, 50 + (l - 1) * 10);
+      else vfdSpeed = Math.min(100, 80 + (l - 7) * 4);
+    }
 
     // Tdiff for level progression. 
-    // Small steps early on so that cooling (which is at Target+0.2) kicks in before we ramp up to level 16.
-    const tDeltas = [0.0, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0];
+    // Small steps early on so that cooling (which is at Target+0.2) kicks in before we ramp up.
+    let tDeltas = [];
+    if (isZ800) {
+      tDeltas = [0.0, 0.1, 0.2, 0.4, 0.6, 1.0, 1.5, 2.0];
+    } else {
+      tDeltas = [0.0, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0];
+    }
     const tDiff = tDeltas[l - 1];
 
-    // Fan state string (for the 12 fans representation)
+    // Fan state string (for the 12 or 6 fans representation)
     const fanStates = [];
-    for (let f = 1; f <= 12; f++) {
+    for (let f = 1; f <= maxDisplayFans; f++) {
       if (f <= continuousFans) {
         fanStates.push("ON");
       } else if (f <= continuousFans + timerFans) {
@@ -271,21 +289,21 @@ export const generateZ1000Recipe = (farmConfig, breedType = "Cobb 500", fanDb) =
   let baseDuration = 60 + ((padVolRatio - 0.0005) / 0.0045) * 60;
   baseDuration = Math.round(baseDuration / 10) * 10;
 
-  for (let i = 0; i < humDays.length; i++) {
-    // As birds age, they produce intrinsic moisture, so we slowly 
-    // reduce delay and increase duration to keep up with the load.
-    let delay = baseDelay - (i * 10);
-    if (delay < 60) delay = 60;
-    
-    let duration = baseDuration + (i * 5);
-    if (duration > 180) duration = 180;
+  if (!isZ800) {
+    for (let i = 0; i < humDays.length; i++) {
+      let delay = baseDelay - (i * 10);
+      if (delay < 60) delay = 60;
+      
+      let duration = baseDuration + (i * 5);
+      if (duration > 180) duration = 180;
 
-    humidityTreatmentTable.push({
-      day: humDays[i],
-      humidity: humTargets[i],
-      delay: Math.round(delay),
-      duration: Math.round(duration)
-    });
+      humidityTreatmentTable.push({
+        day: humDays[i],
+        humidity: humTargets[i],
+        delay: Math.round(delay),
+        duration: Math.round(duration)
+      });
+    }
   }
 
   return {

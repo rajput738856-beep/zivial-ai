@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home, MapPin, Gauge, Users, Fan as FanIcon, Droplet, Clock, Ruler, 
-  ArrowLeft, Sparkles, User, ThermometerSun, Droplets, Edit2, Save, X, Info, AlertTriangle,
+  ArrowLeft, Sparkles, User, ThermometerSun, Droplets, Edit2, Save, X, Info,
   CheckCircle2, Sun, Snowflake, Box, Cpu
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -35,24 +35,22 @@ const FarmPreview = () => {
   const farmData = location.state || {};
   const {
     farmName = "Untitled Farm",
-    ownerName = "",
     location: farmLocation = "Delhi, India",
     controllerModel = "Z1000",
     length = 200,
     width = 60,
-    height = 20,
+    sideWallHeight = 12,
+    centerPeakHeight = 20,
     birdCapacity = 25000,
-    placementDate = "",
     fanCount = 8,
     fanSize = "48 Inch",
     coolingPadLength = 60,
     padHeight = 6,
-    description = "Modern poultry farm optimized for high-density broiler production with advanced ZSE climate control.",
     fanInputType = "size",
     fanCFM = ""
   } = farmData;
-
-  const airVolume = Math.round(length * width * height);
+  const avgHeight = (sideWallHeight + centerPeakHeight) / 2;
+  const airVolume = Math.round(length * width * avgHeight);
   const coolingPadArea = Math.round(coolingPadLength * (padHeight || 6));
   const requiredCFM = Math.round(airVolume * 2.7);
 
@@ -98,7 +96,7 @@ const FarmPreview = () => {
     ? parseFloat(fanCFM) || 0
     : (CFM_BY_SIZE[fanSize] || 10500);
   const totalActiveCFM = sensorInputs.activeFans * fanCFMValue;
-  const crossSectionM2 = width * height * 0.0929;            // ft² → m²
+  const crossSectionM2 = width * avgHeight * 0.0929;            // ft² → m²
   const airVelocityMs = crossSectionM2 > 0
     ? (totalActiveCFM * 0.000471947) / crossSectionM2        // m/s
     : 0;
@@ -178,7 +176,8 @@ const FarmPreview = () => {
             isLoading: false
           });
         }
-      } catch (error) {
+      } catch (err) {
+        console.error(err);
         setWeather({
           temperature: 27.5,
           humidity: 68,
@@ -343,7 +342,7 @@ const FarmPreview = () => {
 
     // Dynamic generation of dayRange field if needed based on updated maxAge
     const finalSaved = parsed.map((s, idx) => {
-      let dayRange = s.dayRange;
+      let dayRange;
       if (idx === 0) {
         dayRange = String(s.maxAge);
       } else if (idx === parsed.length - 1) {
@@ -403,7 +402,7 @@ const FarmPreview = () => {
             </div>
             <div className="flex flex-wrap items-center gap-4 lg:gap-6 text-xs text-zinc-300 relative z-10">
               <div className="flex items-center gap-1.5"><Users size={14} className="text-zinc-500"/> {Number(birdCapacity).toLocaleString()} Birds</div>
-              <div className="flex items-center gap-1.5"><Box size={14} className="text-zinc-500"/> {length} × {width} × {height} ft</div>
+              <div className="flex items-center gap-1.5"><Box size={14} className="text-zinc-500"/> {length} × {width} × {avgHeight} ft</div>
               <div className="flex items-center gap-1.5"><Cpu size={14} className="text-zinc-500"/> {controllerModel} Controller</div>
               <div className="flex items-center gap-1.5"><FanIcon size={14} className="text-zinc-500"/> {fanCount} Fans</div>
             </div>

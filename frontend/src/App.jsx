@@ -3,11 +3,13 @@ import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "./context/ThemeContext";
 
-import LandingPage from "./pages/Landing/LandingPage";
-import FarmInfrastructure from "./pages/Landing/FarmInfrastructure";
-import AIProcessing from "./pages/Landing/AIProcessing";
-import GeneratedSettings from "./pages/Landing/GeneratedSettings";
-import FarmPreview from "./pages/Landing/FarmPreview";
+import { lazy, Suspense } from "react";
+
+const LandingPage = lazy(() => import("./pages/Landing/LandingPage"));
+const FarmInfrastructure = lazy(() => import("./pages/Landing/FarmInfrastructure"));
+const AIProcessing = lazy(() => import("./pages/Landing/AIProcessing"));
+const GeneratedSettings = lazy(() => import("./pages/Landing/GeneratedSettings"));
+const FarmPreview = lazy(() => import("./pages/Landing/FarmPreview"));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -38,26 +40,28 @@ export default function App() {
           }
         }} 
       />
-      <Routes>
+      <Suspense fallback={<div className="min-h-screen bg-[#030712] text-brand flex items-center justify-center">Loading...</div>}>
+        <Routes>
 
-        <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<LandingPage />} />
 
-        <Route
-          path="/farm-infrastructure"
-          element={<FarmInfrastructure />}
-        />
-        <Route path="/farm-preview" element={<FarmPreview />} />
+          <Route
+            path="/farm-infrastructure"
+            element={<FarmInfrastructure />}
+          />
+          <Route path="/farm-preview" element={<FarmPreview />} />
 
-        <Route path="/processing" element={<AIProcessing />} />
+          <Route path="/processing" element={<AIProcessing />} />
 
-        <Route
-          path="/generated-settings"
-          element={<GeneratedSettings />}
-        />
+          <Route
+            path="/generated-settings"
+            element={<GeneratedSettings />}
+          />
 
 
 
-      </Routes>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
     </ThemeProvider>
   );

@@ -13,27 +13,13 @@ const GeneratedSettings = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState('Stage');
 
-  const [recipe, setRecipe] = useState(null);
-  const [recipeData, setRecipeData] = useState(null);
-  const [calcParams, setCalcParams] = useState(null);
-  const [farmInputData, setFarmInputData] = useState(null);
+  const [recipe] = useState(location.state?.recipe || null);
+  const [recipeData] = useState(location.state?.recipe?.recipeData || null);
+  const [calcParams] = useState(location.state?.recipe?.calculatedParameters || null);
+  const [farmInputData] = useState(location.state?.formData || null);
 
-  useEffect(() => {
-    if (location.state?.recipe) {
-      setRecipe(location.state.recipe);
-      if (location.state.recipe.recipeData) {
-        setRecipeData(location.state.recipe.recipeData);
-      }
-      if (location.state.recipe.calculatedParameters) {
-        setCalcParams(location.state.recipe.calculatedParameters);
-      }
-    }
-    if (location.state?.formData) {
-      setFarmInputData(location.state.formData);
-    }
-  }, [location.state]);
-
-  const tabs = ['Stage', 'Ventilation', 'Cooling', 'Humidity', 'Lighting', 'Feeding'];
+  const isZ800 = recipe?.controllerModel === 'Z800';
+  const tabs = isZ800 ? ['Stage', 'Ventilation', 'Cooling'] : ['Stage', 'Ventilation', 'Cooling', 'Humidity', 'Lighting', 'Feeding'];
 
   const handleDownloadPDF = () => {
     window.print();
@@ -325,7 +311,7 @@ const GeneratedSettings = () => {
 
                     return chartData;
                   })()}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
+                  margin={{ top: 10, right: 30, left: 0, bottom: 40 }}
                 >
                   <defs>
                     <linearGradient id="gradTarget" x1="0" y1="0" x2="0" y2="1">
@@ -340,10 +326,10 @@ const GeneratedSettings = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                   <XAxis 
                     dataKey="day" 
-                    height={50}
+                    height={80}
                     stroke="#71717a" 
-                    tick={{ fill: '#a1a1aa', fontSize: 12 }} 
-                    label={{ value: 'Bird Age (Days)', position: 'insideBottom', offset: -10, fill: '#a1a1aa', fontSize: 13 }}
+                    tick={{ fill: '#a1a1aa', fontSize: 12, dy: 10 }} 
+                    label={{ value: 'Bird Age (Days)', position: 'insideBottom', offset: 40, fill: '#a1a1aa', fontSize: 13 }}
                   />
                   <YAxis 
                     yAxisId="temp"
@@ -371,7 +357,8 @@ const GeneratedSettings = () => {
                     labelFormatter={(v) => `Day ${v}`}
                   />
                   <Legend 
-                    wrapperStyle={{ paddingTop: '16px', fontSize: '13px' }}
+                    verticalAlign="bottom"
+                    wrapperStyle={{ paddingTop: '25px', fontSize: '13px' }}
                   />
                   <Area yAxisId="temp" type="monotone" dataKey="target" stroke="#d11243" strokeWidth={2.5} fill="url(#gradTarget)" name="Target Temp (°C)" connectNulls />
                   <Line yAxisId="temp" type="monotone" dataKey="heating" stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="5 5" dot={{ r: 3 }} name="Heating Temp (°C)" connectNulls />
@@ -517,10 +504,10 @@ const GeneratedSettings = () => {
                               <td className="px-4 py-5 border-r border-white/5 font-mono">{vent.fanOff}</td>
                               <td className="px-4 py-5 border-r border-white/5 text-brand font-bold">{vent.fanPct}</td>
                               {vent.fans && vent.fans.map((fanStatus, fIdx) => {
-                                let circleClass = "";
-                                let label = "";
-                                let labelClass = "";
-                                let iconClass = "";
+                                let circleClass;
+                                let label;
+                                let labelClass;
+                                let iconClass;
                                 let dutyBadge = null;
 
                                 const detail = vent.fanDetails && vent.fanDetails[fIdx];
@@ -848,7 +835,7 @@ const GeneratedSettings = () => {
 
                   return chartData;
                 })()}
-                margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
+                margin={{ top: 10, right: 30, left: 0, bottom: 40 }}
               >
                 <defs>
                   <linearGradient id="gradTargetPrint" x1="0" y1="0" x2="0" y2="1">
@@ -863,10 +850,10 @@ const GeneratedSettings = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis 
                   dataKey="day" 
-                  height={50}
+                  height={80}
                   stroke="#374151" 
-                  tick={{ fill: '#374151', fontSize: 12 }} 
-                  label={{ value: 'Bird Age (Days)', position: 'insideBottom', offset: -10, fill: '#374151', fontSize: 13 }}
+                  tick={{ fill: '#374151', fontSize: 12, dy: 10 }} 
+                  label={{ value: 'Bird Age (Days)', position: 'insideBottom', offset: 40, fill: '#374151', fontSize: 13 }}
                 />
                 <YAxis 
                   yAxisId="temp"
@@ -894,7 +881,8 @@ const GeneratedSettings = () => {
                   labelFormatter={(v) => `Day ${v}`}
                 />
                 <Legend 
-                  wrapperStyle={{ paddingTop: '16px', fontSize: '13px', color: '#111827' }}
+                  verticalAlign="bottom"
+                  wrapperStyle={{ paddingTop: '25px', fontSize: '13px', color: '#111827' }}
                 />
                 <Area isAnimationActive={false} yAxisId="temp" type="monotone" dataKey="target" stroke="#d11243" strokeWidth={2.5} fill="url(#gradTargetPrint)" name="Target Temp (°C)" connectNulls />
                 <Line isAnimationActive={false} yAxisId="temp" type="monotone" dataKey="heating" stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="5 5" dot={{ r: 3 }} name="Heating Temp (°C)" connectNulls />

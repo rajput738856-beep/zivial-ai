@@ -19,7 +19,8 @@ const FarmInfrastructure = () => {
     controllerModel: initialData.controllerModel || '',
     length: initialData.length || '',
     width: initialData.width || '',
-    height: initialData.height || '',
+    sideWallHeight: initialData.sideWallHeight || '',
+    centerPeakHeight: initialData.centerPeakHeight || '',
     birdCapacity: initialData.birdCapacity || '',
     placementDate: initialData.placementDate || '',
     fanCount: initialData.fanCount || '',
@@ -69,7 +70,8 @@ const FarmInfrastructure = () => {
     if (!formData.controllerModel) newErrors.controllerModel = 'Controller model is required';
     if (!formData.length) newErrors.length = 'Length is required';
     if (!formData.width) newErrors.width = 'Width is required';
-    if (!formData.height) newErrors.height = 'Height is required';
+    if (!formData.sideWallHeight) newErrors.sideWallHeight = 'Side Wall Height is required';
+    if (!formData.centerPeakHeight) newErrors.centerPeakHeight = 'Center Peak Height is required';
     if (!formData.birdCapacity) newErrors.birdCapacity = 'Bird count is required';
     if (!formData.placementDate) newErrors.placementDate = 'Placement date is required';
     if (!formData.fanCount) newErrors.fanCount = 'Fan count is required';
@@ -97,7 +99,8 @@ const FarmInfrastructure = () => {
         ...formData,
         length: parseFloat(formData.length) || 200,
         width: parseFloat(formData.width) || 60,
-        height: parseFloat(formData.height) || 20,
+        sideWallHeight: parseFloat(formData.sideWallHeight) || 12,
+        centerPeakHeight: parseFloat(formData.centerPeakHeight) || 20,
         birdCapacity: parseInt(formData.birdCapacity) || 25000,
         placementDate: formData.placementDate,
         fanCount: parseInt(formData.fanCount) || 8,
@@ -330,16 +333,28 @@ const FarmInfrastructure = () => {
                       {errors.width && <p className="text-brand text-sm mt-2">{errors.width}</p>}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-zinc-400 mb-2.5">Height (ft) <span className="text-brand">*</span></label>
+                      <label className="block text-sm font-medium text-zinc-400 mb-2.5">Side Wall Height (ft) <span className="text-brand">*</span></label>
                       <input
                         type="number"
-                        name="height"
-                        value={formData.height}
+                        name="sideWallHeight"
+                        value={formData.sideWallHeight}
+                        onChange={handleChange}
+                        placeholder="12"
+                        className="w-full bg-zinc-950 border border-zinc-700 rounded-2xl px-7 py-4 text-lg focus:outline-none focus:border-brand transition-colors placeholder-zinc-500"
+                      />
+                      {errors.sideWallHeight && <p className="text-brand text-sm mt-2">{errors.sideWallHeight}</p>}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-2.5">Center Peak Height (ft) <span className="text-brand">*</span></label>
+                      <input
+                        type="number"
+                        name="centerPeakHeight"
+                        value={formData.centerPeakHeight}
                         onChange={handleChange}
                         placeholder="22"
                         className="w-full bg-zinc-950 border border-zinc-700 rounded-2xl px-7 py-4 text-lg focus:outline-none focus:border-brand transition-colors placeholder-zinc-500"
                       />
-                      {errors.height && <p className="text-brand text-sm mt-2">{errors.height}</p>}
+                      {errors.centerPeakHeight && <p className="text-brand text-sm mt-2">{errors.centerPeakHeight}</p>}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-zinc-400 mb-2.5">Current Bird Count <span className="text-brand">*</span></label>

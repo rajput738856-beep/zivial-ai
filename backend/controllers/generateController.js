@@ -12,7 +12,7 @@ import { calculateBirdHeat } from "../src/calculations/birdHeatCalculator.js";
 import { calculateMinimumVentilation } from "../src/calculations/minimumVentilationCalculator.js";
 import { calculateTransitionVentilation } from "../src/calculations/transitionVentilationCalculator.js";
 import { calculateTunnelVentilation } from "../src/calculations/tunnelVentilationCalculator.js";
-import { generateZ1000Recipe } from "../src/calculations/batchRecipeGenerator.js";
+import { generateRecipe as generateBatchRecipe } from "../src/calculations/batchRecipeGenerator.js";
 import { FAN_DATABASE } from "../src/config/fanDatabase.js";
 import { STAGE_LOOKUP } from "../config/poultryConfig.js";
 import { BREED_PROFILES } from "../config/breedProfiles.js";
@@ -29,7 +29,8 @@ export const generateRecipe = async (req, res) => {
       controllerModel = "Z1000",
       length = 200,
       width = 60,
-      height = 20,
+      sideWallHeight = 12,
+      centerPeakHeight = 20,
       birdCapacity = 25000,
       placementDate = "",
       fanCount = 10,
@@ -48,7 +49,9 @@ export const generateRecipe = async (req, res) => {
 
     const lengthNum = parseFloat(length) || 200;
     const widthNum = parseFloat(width) || 60;
-    const heightNum = parseFloat(height) || 20;
+    const sideWallHeightNum = parseFloat(sideWallHeight) || 12;
+    const centerPeakHeightNum = parseFloat(centerPeakHeight) || 20;
+    const heightNum = (sideWallHeightNum + centerPeakHeightNum) / 2;
     const birdCapacityNum = parseInt(birdCapacity) || 25000;
     const fanCountNum = parseInt(fanCount) || 10;
     const coolingPadLengthNum = parseFloat(coolingPadLength) || 60;
@@ -269,8 +272,8 @@ export const generateRecipe = async (req, res) => {
     const humDetails = getHumidityControlSettings(birdAge, ambientHumPct);
 
     // 13. Get Lighting & Feeding Schedules
-    const lighting = getLightingSettings(birdAge);
-    const feeding = getFeedingSettings(birdAge);
+    const lighting = controllerModel === "Z800" ? [] : getLightingSettings(birdAge);
+    const feeding = controllerModel === "Z800" ? [] : getFeedingSettings(birdAge);
 
     // Dynamic batch-based engineering calculations
     const breedData = BREED_PROFILES[breed] || BREED_PROFILES["Cobb 500"];
@@ -327,8 +330,8 @@ export const generateRecipe = async (req, res) => {
       return new Date().toLocaleDateString('en-US', options);
     };
 
-    // Generate Z1000 Batch Recipe
-    const batchRecipe = generateZ1000Recipe(farmConfig, breed, FAN_DATABASE);
+    // Generate Batch Recipe (Handles Z1000 and Z800 logic)
+    const batchRecipe = generateBatchRecipe(farmConfig, breed, FAN_DATABASE, controllerModel);
 
     const recipe = {
       recipeName: `${farmName.replace(/farm/i, "").trim()} ZSE Recipe`,

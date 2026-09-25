@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Download, Printer, Save, ArrowLeft, CheckCircle, Fan } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import toast from 'react-hot-toast';
+import * as XLSX from 'xlsx';
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import PageStepper from "../../components/common/PageStepper";
@@ -30,7 +31,90 @@ const GeneratedSettings = () => {
   };
 
   const handleSaveRecipe = () => {
-    toast.success("Recipe configuration saved successfully.");
+    try {
+      const wb = XLSX.utils.book_new();
+
+      // 1. Farm Information
+      const farmInfoData = [
+        { Parameter: "Farm Name", Value: farmInputData?.farmName || recipe?.farmName || "N/A" },
+        { Parameter: "Owner Name", Value: farmInputData?.ownerName || recipe?.ownerName || "N/A" },
+        { Parameter: "Location", Value: farmInputData?.location || recipe?.location || "N/A" },
+        { Parameter: "Controller Model", Value: farmInputData?.controllerModel || recipe?.controllerModel || "N/A" },
+        { Parameter: "Length (ft)", Value: farmInputData?.length || "N/A" },
+        { Parameter: "Width (ft)", Value: farmInputData?.width || "N/A" },
+        { Parameter: "Side Wall Height (ft)", Value: farmInputData?.sideWallHeight || "N/A" },
+        { Parameter: "Center Peak Height (ft)", Value: farmInputData?.centerPeakHeight || "N/A" },
+        { Parameter: "Bird Capacity", Value: farmInputData?.birdCapacity || "N/A" },
+        { Parameter: "Volume (cu ft)", Value: calcParams?.volumeCuFt || "N/A" }
+      ];
+      const wsFarm = XLSX.utils.json_to_sheet(farmInfoData);
+      XLSX.utils.book_append_sheet(wb, wsFarm, "Farm Info");
+
+      // 2. Stage Settings
+      if (recipeData?.stages && recipeData.stages.length > 0) {
+        const stageSettingsData = recipeData.stages.map(s => ({
+          "Stage": s.stageNum || s.stage,
+          "Max Age (Days)": s.maxAge || s.dayRange || s.day,
+          "Target Temp (°C)": s.target || s.targetTemp,
+          "Heat Temp (°C)": s.heat || s.heatingTemp,
+          "Cooling Temp (°C)": s.cool || s.coolingTemp,
+          "Min Alarm (°C)": s.alarmMin || s.minAlarm,
+          "Max Alarm (°C)": s.alarmMax || s.maxAlarm
+        }));
+        const wsStages = XLSX.utils.json_to_sheet(stageSettingsData);
+        XLSX.utils.book_append_sheet(wb, wsStages, "Stage Settings");
+      }
+
+      // 3. Ventilation
+      if (recipeData?.ventilation && recipeData.ventilation.length > 0) {
+        const ventData = recipeData.ventilation.map(v => ({
+          "Level": v.level,
+          "CFM": v.cfm,
+          "Fan On (s)": v.fanOn,
+          "Fan Off (s)": v.fanOff,
+          "Fan %": v.fanPct,
+          "Active Fans": v.fans ? (Array.isArray(v.fans) ? v.fans.join(", ") : v.fans) : "None"
+        }));
+        const wsVent = XLSX.utils.json_to_sheet(ventData);
+        XLSX.utils.book_append_sheet(wb, wsVent, "Ventilation");
+      }
+
+      // 4. Cooling
+      if (recipeData?.cooling && recipeData.cooling.length > 0) {
+        const coolingData = recipeData.cooling.map(c => ({
+          "Day": c.day,
+          "Start Time": c.startTime,
+          "Stop Time": c.stopTime,
+          "On Time (s)": c.onTime,
+          "Min Off (s)": c.minOff,
+          "Max Off (s)": c.maxOff,
+          "Off RH (%)": c.offRH
+        }));
+        const wsCooling = XLSX.utils.json_to_sheet(coolingData);
+        XLSX.utils.book_append_sheet(wb, wsCooling, "Cooling");
+      }
+
+      // 5. Humidity
+      if (recipeData?.humidity && recipeData.humidity.length > 0 && !isZ800) {
+        const humData = recipeData.humidity.map(h => ({
+          "Day": h.day,
+          "Target Humidity (%)": h.humidity,
+          "Delay": h.delay,
+          "Duration": h.duration
+        }));
+        const wsHum = XLSX.utils.json_to_sheet(humData);
+        XLSX.utils.book_append_sheet(wb, wsHum, "Humidity");
+      }
+
+      // Generate Excel file and trigger download
+      const fileName = `${(recipe?.recipeName || "Farm_Settings").replace(/\s+/g, '_')}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+      
+      toast.success("Settings saved to Excel successfully.");
+    } catch (error) {
+      console.error("Error exporting to Excel:", error);
+      toast.error("Failed to save Excel file.");
+    }
   };
 
   const renderTimeInputs = (timeStr) => {
